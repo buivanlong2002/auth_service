@@ -20,7 +20,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 		<!-- ✨ Thêm version cho mapstruct -->
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 	</properties>
@@ -42,7 +42,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- ✅ Sửa lại Lombok: bỏ optional -->
+		<!--  Sửa lại Lombok: bỏ optional -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -62,7 +62,7 @@
 			<version>2.2.0</version>
 		</dependency>
 
-		<!-- ✅ Thêm MapStruct cho DTO mapping -->
+		<!--  Thêm MapStruct cho DTO mapping -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
@@ -137,13 +137,13 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 					<annotationProcessorPaths>
-						<!-- ✅ Cấu hình annotation processor cho Lombok -->
+						<!--  Cấu hình annotation processor cho Lombok -->
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>1.18.30</version>
 						</path>
-						<!-- ✅ Cấu hình annotation processor cho MapStruct -->
+						<!--  Cấu hình annotation processor cho MapStruct -->
 						<path>
 							<groupId>org.mapstruct</groupId>
 							<artifactId>mapstruct-processor</artifactId>
@@ -156,7 +156,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<!-- ❌ Bỏ exclude Lombok (không cần loại trừ nữa) -->
+
 			</plugin>
 		</plugins>
 	</build>
