@@ -167,6 +167,7 @@ public class AuthService {
 
         User newUser = User.builder()
                 .email(email)
+                .phone("0000000000")
                 .name(name)
                 .password(encodedPassword) // hoặc có thể đặt "default" nếu cần (và encode nếu dùng spring security)
                 .googleAccountId(1)
