@@ -47,39 +47,33 @@ public class AuthService {
     private OtpTokenRepository otpTokenRepository;
     @Autowired
     private OtpService otpService;
+    @Autowired
+    private  ExecutorService executorService;
+
+    public AuthService(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
 
     public AuthResponse login(LoginRequest request) {
-        GeneralStatus status;
-        ExecutorService executor = Executors.newFixedThreadPool(10); // Tạo pool cho 10 luồng
+//        long startTime = System.currentTimeMillis();
         try {
-            Callable<AuthResponse> task = () -> {
-                // Tìm người dùng theo email
-                User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+            User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
-                if (user == null) {
-                    return buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
-                }
-                // Kiểm tra mật khẩu
-                if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                    return buildAuthResponse("02", "Mật khẩu không chính xác");
-                }
-                // Tạo token
-                String token = jwtTokenUtil.generateToken(user);
-                return buildAuthResponse("00", "Đăng nhập thành công", token);
-            };
+            if (user == null) {
+                return buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
+            }
 
-            Future<AuthResponse> future = executor.submit(task);
-            return future.get(); // Chờ kết quả từ tác vụ
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                return buildAuthResponse("02", "Mật khẩu không chính xác");
+            }
 
+            String token = jwtTokenUtil.generateToken(user);
+            return buildAuthResponse("00", "Đăng nhập thành công", token);
         } catch (Exception ex) {
             ex.printStackTrace();
             return buildAuthResponse("99", "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
-        } finally {
-            executor.shutdown(); // Đảm bảo đóng executor khi kết thúc
-        }
+        } 
     }
-
-
 
 
     // đăng người dùng
@@ -103,7 +97,7 @@ public class AuthService {
             }
             // 3. Tạo User mới
             User user = new User();
-//            user.setId(UUID.randomUUID().toString());
+            user.setPhone(request.getPhone());
             user.setName(request.getName());
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword())); // mã hóa mật khẩu
@@ -143,6 +137,7 @@ public class AuthService {
         userRepository.save(user);
 
     }
+
     public User loginGoogle(@NotBlank String token) throws Exception {
         // Tạo trình xác thực token Google
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +26,9 @@ public class User extends BaseEntity  implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(unique = true, nullable = false)
+    private String phone;
 
     @Column(nullable = false)
     private String password;
