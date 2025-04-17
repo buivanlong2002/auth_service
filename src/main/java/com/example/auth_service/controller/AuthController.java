@@ -8,6 +8,7 @@ import com.example.auth_service.dtos.request.RegisterRequest;
 import com.example.auth_service.dtos.request.ResetPasswordRequest;
 import com.example.auth_service.dtos.response.AuthResponse;
 import com.example.auth_service.dtos.response.RegisterResponse;
+import com.example.auth_service.dtos.response.ResetPasswordResponse;
 import com.example.auth_service.model.User;
 import com.example.auth_service.service.AuthService;
 
@@ -37,9 +38,8 @@ public class AuthController {
         return ResponseEntity.ok(authService.register(request));
     }
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
-        return ResponseEntity.ok("Đổi mật khẩu thành công!");
+    public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 
     // xử lý login gg

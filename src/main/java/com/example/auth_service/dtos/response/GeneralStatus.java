@@ -47,4 +47,8 @@ public class GeneralStatus implements Serializable {
         this.displayMessage = this.message;
     }
 
+    public GeneralStatus(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
 }

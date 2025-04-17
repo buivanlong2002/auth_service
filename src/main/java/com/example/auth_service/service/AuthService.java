@@ -3,9 +3,11 @@ package com.example.auth_service.service;
 import com.example.auth_service.components.JwtTokenUtil;
 import com.example.auth_service.dtos.request.LoginRequest;
 import com.example.auth_service.dtos.request.RegisterRequest;
+import com.example.auth_service.dtos.request.ResetPasswordRequest;
 import com.example.auth_service.dtos.response.AuthResponse;
 import com.example.auth_service.dtos.response.GeneralStatus;
 import com.example.auth_service.dtos.response.RegisterResponse;
+import com.example.auth_service.dtos.response.ResetPasswordResponse;
 import com.example.auth_service.model.Role;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repositories.OtpTokenRepository;
@@ -24,11 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 @Service
@@ -48,7 +46,9 @@ public class AuthService {
     @Autowired
     private OtpService otpService;
     @Autowired
-    private  ExecutorService executorService;
+    private ExecutorService executorService;
+   @Autowired
+    private ResponseService responseService;
 
     public AuthService(ExecutorService executorService) {
         this.executorService = executorService;
@@ -60,19 +60,19 @@ public class AuthService {
             User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
             if (user == null) {
-                return buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
+                return responseService.buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
             }
 
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                return buildAuthResponse("02", "Mật khẩu không chính xác");
+                return responseService.buildAuthResponse("02", "Mật khẩu không chính xác");
             }
 
             String token = jwtTokenUtil.generateToken(user);
-            return buildAuthResponse("00", "Đăng nhập thành công", token);
+            return responseService.buildAuthResponse("00", "Đăng nhập thành công", token);
         } catch (Exception ex) {
             ex.printStackTrace();
-            return buildAuthResponse("99", "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
-        } 
+            return responseService.buildAuthResponse("99", "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
+        }
     }
 
 
@@ -121,21 +121,20 @@ public class AuthService {
         }
     }
 
-    public void resetPassword(String email, String otp, String newPassword) {
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
         // Xác thực OTP
-        if (!otpService.verifyOtp(email, otp)) {
-            throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn!");
+        if (!otpService.verifyOtp(request.getEmail(), request.getOtp())) {
+            return responseService.buildResetPasswordResponse("01","Otp đã hết hạn ");
         }
-        otpTokenRepository.deleteByEmail(email);
+        otpTokenRepository.deleteByEmail(request.getEmail());
 
         // Lấy thông tin user
-        User user = (User) userRepository.findByEmail(email)
+        User user = (User) userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User không tồn tại!"));
-
         // Cập nhật mật khẩu mới
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-
+          return responseService.buildResetPasswordResponse("00","Đổi mật khẩu thành công ");
     }
 
     public User loginGoogle(@NotBlank String token) throws Exception {
@@ -189,15 +188,4 @@ public class AuthService {
 
         return newUser;
     }
-
-    private AuthResponse buildAuthResponse(String code, String displayMessage) {
-        return buildAuthResponse(code, displayMessage, null);
-    }
-
-    private AuthResponse buildAuthResponse(String code, String displayMessage, String token) {
-        GeneralStatus status = new GeneralStatus(code, true);
-        status.setDisplayMessage(displayMessage);
-        return new AuthResponse(status, token);
-    }
-
 }
