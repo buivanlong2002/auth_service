@@ -101,17 +101,17 @@ public class OtpService {
 
     //  Kiểm tra OTP
     public boolean verifyOtp(String email, String otp) {
-        Optional<OtpToken> otpTokenOptional = otpTokenRepository.findByEmail(email);
 
+        Optional<OtpToken> otpTokenOptional = otpTokenRepository.findByEmail(email);
         if (otpTokenOptional.isPresent()) {
             OtpToken otpToken = otpTokenOptional.get();
-
             if (!otpToken.isExpired() && otpToken.getOtp().equals(otp)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
+
 
 
 

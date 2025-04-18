@@ -28,9 +28,9 @@ public class OtpController {
     public ResponseEntity<VerifyOtpResponse> verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) throws MessagingException {
       boolean check = otpService.verifyOtp(verifyOtpRequest.getEmail(),verifyOtpRequest.getOtp());
       if (check) {
-          return ResponseEntity.ok(responseService.buildVerifyOtpResponse("01","OTP đã hết hạn,vui lòng nhấn gửi lại OTP"));
-      }else {
           return ResponseEntity.ok(responseService.buildVerifyOtpResponse("00","OTP hợp lệ"));
+      }else {
+          return ResponseEntity.ok(responseService.buildVerifyOtpResponse("00","OTP đã hết hạn,vui lòng nhấn gửi lại OTP"));
       }
 
     }
