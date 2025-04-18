@@ -1,4 +1,3 @@
-# Stage 1: Build
 FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 
@@ -9,15 +8,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-# Sửa lại dòng này: copy JAR thay vì WAR
 COPY --from=build /app/target/auth_service-0.0.1-SNAPSHOT.jar app.jar
-<<<<<<< HEAD
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
-
-=======
-
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
->>>>>>> 75c60f6 (add)
