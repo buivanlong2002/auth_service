@@ -30,7 +30,7 @@ public class OtpController {
       if (check) {
           return ResponseEntity.ok(responseService.buildVerifyOtpResponse("00","OTP hợp lệ"));
       }else {
-          return ResponseEntity.ok(responseService.buildVerifyOtpResponse("00","OTP đã hết hạn,vui lòng nhấn gửi lại OTP"));
+          return ResponseEntity.ok(responseService.buildVerifyOtpResponse("01","OTP đã hết hạn,vui lòng nhấn gửi lại OTP"));
       }
 
     }
