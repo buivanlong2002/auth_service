@@ -1,5 +1,6 @@
 package com.example.auth_service.service;
 
+import com.example.auth_service.Exception.GlobalExceptionHandler;
 import com.example.auth_service.components.JwtTokenUtil;
 import com.example.auth_service.dtos.request.LoginRequest;
 import com.example.auth_service.dtos.request.RegisterRequest;
@@ -49,6 +50,8 @@ public class AuthService {
     private ExecutorService executorService;
    @Autowired
     private ResponseService responseService;
+   @Autowired
+   private GlobalExceptionHandler globalExceptionHandler;
 
     public AuthService(ExecutorService executorService) {
         this.executorService = executorService;
@@ -58,33 +61,26 @@ public class AuthService {
 //        long startTime = System.currentTimeMillis();
         try {
             User user = userRepository.findByEmail(request.getEmail()).orElse(null);
-
             if (user == null) {
                 return responseService.buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
             }
-
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 return responseService.buildAuthResponse("02", "Mật khẩu không chính xác");
             }
-
             String token = jwtTokenUtil.generateToken(user);
             return responseService.buildAuthResponse("00", "Đăng nhập thành công", token);
         } catch (Exception ex) {
             ex.printStackTrace();
-            return responseService.buildAuthResponse("99", "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
+            return globalExceptionHandler.handleRuntimeException((RuntimeException) ex).getBody();
         }
     }
-
 
     // đăng người dùng
     public RegisterResponse register(RegisterRequest request) {
         try {
             // 1. Kiểm tra email đã tồn tại chưa
             if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-                GeneralStatus status = new GeneralStatus("01", true);
-                status.setDisplayMessage("Email đã được sử dụng");
-                status.setResponseTime(new Date());
-                return new RegisterResponse(status);
+                return responseService.buildRegisterResponse("01","Email đã được sử dụng");
             }
 //            // 2. Lấy Role (nếu roleId null thì set mặc định)
             Role role;
@@ -100,29 +96,23 @@ public class AuthService {
             user.setPhone(request.getPhone());
             user.setName(request.getName());
             user.setEmail(request.getEmail());
-            user.setPassword(passwordEncoder.encode(request.getPassword())); // mã hóa mật khẩu
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setRole(role);
             user.setActive(true);
             // 4. Lưu user
             userRepository.save(user);
             // 5. Trả về AuthResponse
-            GeneralStatus status = new GeneralStatus("00", true);
-            status.setDisplayMessage("Đăng ký thành công");
-            status.setResponseTime(new Date());
-
-            return new RegisterResponse(status);
+            return responseService.buildRegisterResponse("00","Đăng ký thành công");
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            GeneralStatus status = new GeneralStatus("99", true);
-            status.setDisplayMessage("Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
-            status.setResponseTime(new Date());
-            return new RegisterResponse(status);
+            return responseService.buildRegisterResponse("99","Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
         }
     }
 
     public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
         // Xác thực OTP
+
         if (!otpService.verifyOtp(request.getEmail(), request.getOtp())) {
             return responseService.buildResetPasswordResponse("01","Otp đã hết hạn ");
         }
@@ -172,7 +162,6 @@ public class AuthService {
 
         // mã hóa mật khẩu fake
         String encodedPassword = passwordEncoder.encode("abcxyz");
-
 
         User newUser = User.builder()
                 .email(email)

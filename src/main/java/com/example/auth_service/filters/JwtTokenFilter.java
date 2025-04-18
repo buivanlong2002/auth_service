@@ -1,7 +1,5 @@
 package com.example.auth_service.filters;
 
-
-
 import com.example.auth_service.components.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,11 +23,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
-
     private final HttpServletResponse httpServletResponse;
     @Value("${api.prefix}") // Lấy giá trị từ file cấu hình
     private String apiPrefix;
@@ -97,7 +93,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
         }
     }
-
     // Kiểm tra URL có được bỏ qua xác thực hay không
     private boolean isBypassToken(@NotNull HttpServletRequest request) {
         // Danh sách các API không yêu cầu xác thực
@@ -109,9 +104,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(String.format("%s/auth/reset-password", apiPrefix), "POST"),
                 Pair.of(String.format("%s/auth/login", apiPrefix), "POST")
 
-
         );
-
         // Duyệt danh sách và kiểm tra đường dẫn và phương thức HTTP
         for (Pair<String, String> bypassToken : bypassTokens) {
             if (request.getServletPath().contains(bypassToken.getFirst()) &&

@@ -1,9 +1,11 @@
 package com.example.auth_service.service;
 
 import com.example.auth_service.dtos.request.OtpSendRequest;
+import com.example.auth_service.dtos.request.VerifyOtpRequest;
 import com.example.auth_service.dtos.response.GeneralStatus;
 import com.example.auth_service.dtos.response.OtpSendResponse;
 import com.example.auth_service.dtos.response.RegisterResponse;
+import com.example.auth_service.dtos.response.VerifyOtpResponse;
 import com.example.auth_service.model.OtpToken;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repositories.OtpTokenRepository;
@@ -30,6 +32,8 @@ public class OtpService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private ResponseService responseService;
 
     public OtpService(OtpTokenRepository otpTokenRepository) {
         this.otpTokenRepository = otpTokenRepository;
@@ -103,9 +107,12 @@ public class OtpService {
             OtpToken otpToken = otpTokenOptional.get();
 
             if (!otpToken.isExpired() && otpToken.getOtp().equals(otp)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
+
+
+
 }

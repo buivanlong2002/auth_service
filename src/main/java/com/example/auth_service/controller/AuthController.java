@@ -53,11 +53,9 @@ public class AuthController {
                     .toList();
             return ResponseEntity.badRequest().body(errors);
         }
-
         try {
             // Gọi service xử lý đăng nhập Google
             User user = authService.loginGoogle(loginGoogleDTO.getToken());
-
             // Trả về thông tin user hoặc token tùy bạn
             return ResponseEntity.ok(user);
         } catch (Exception e) {
