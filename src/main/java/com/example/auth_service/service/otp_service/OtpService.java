@@ -1,15 +1,13 @@
-package com.example.auth_service.service;
+package com.example.auth_service.service.otp_service;
 
-import com.example.auth_service.dtos.request.OtpSendRequest;
-import com.example.auth_service.dtos.request.VerifyOtpRequest;
+import com.example.auth_service.dtos.request.auth_req.OtpSendRequest;
 import com.example.auth_service.dtos.response.GeneralStatus;
-import com.example.auth_service.dtos.response.OtpSendResponse;
-import com.example.auth_service.dtos.response.RegisterResponse;
-import com.example.auth_service.dtos.response.VerifyOtpResponse;
+import com.example.auth_service.dtos.response.auth_res.OtpSendResponse;
 import com.example.auth_service.model.OtpToken;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repositories.OtpTokenRepository;
 import com.example.auth_service.repositories.UserRepository;
+import com.example.auth_service.service.email_service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,8 +30,6 @@ public class OtpService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private ResponseService responseService;
 
     public OtpService(OtpTokenRepository otpTokenRepository) {
         this.otpTokenRepository = otpTokenRepository;

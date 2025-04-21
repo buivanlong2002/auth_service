@@ -102,10 +102,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(String.format("%s/auth/otp/verify", apiPrefix), "POST"),
                 Pair.of(String.format("%s/auth/login-google", apiPrefix), "POST"),
                 Pair.of(String.format("%s/auth/reset-password", apiPrefix), "POST"),
-                Pair.of(String.format("%s/users", apiPrefix), "GET"),
-                Pair.of(String.format("%s/auth/login", apiPrefix), "POST"),
-                Pair.of(String.format("%s/users/", apiPrefix), "GET"),
-                Pair.of(String.format("%s/users/", apiPrefix), "POST") // lưu ý phần `/users/` để match với `/users/{id}/avatar`
+                Pair.of(String.format("%s/auth/login", apiPrefix), "POST")
+                // để tạm chưa làm yêu cầu xác thực
+//                Pair.of(String.format("%s/users", apiPrefix), "GET"),
+//                Pair.of(String.format("%s/users/", apiPrefix), "GET"),
+//                Pair.of(String.format("%s/users/", apiPrefix), "DELETE"),
+//                Pair.of(String.format("%s/users/", apiPrefix), "POST"),
+//                Pair.of(String.format("%s/users/add", apiPrefix), "POST")
 
         );
         // Duyệt danh sách và kiểm tra đường dẫn và phương thức HTTP

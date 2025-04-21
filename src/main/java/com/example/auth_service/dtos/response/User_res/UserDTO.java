@@ -1,9 +1,6 @@
-package com.example.auth_service.dtos.response;
+package com.example.auth_service.dtos.response.User_res;
 
-import com.example.auth_service.model.Address;
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +11,8 @@ public class UserDTO {
     private String id;
     private String name;
     private String email;
-    private List<Address> addressList;
+    private String address;
     private String phone;
+    private boolean active;
     private long role;
 }

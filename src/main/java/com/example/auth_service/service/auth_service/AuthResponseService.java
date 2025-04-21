@@ -1,12 +1,16 @@
-package com.example.auth_service.service;
+package com.example.auth_service.service.auth_service;
 
-import com.example.auth_service.dtos.response.*;
+import com.example.auth_service.dtos.response.GeneralStatus;
+import com.example.auth_service.dtos.response.auth_res.AuthResponse;
+import com.example.auth_service.dtos.response.auth_res.RegisterResponse;
+import com.example.auth_service.dtos.response.auth_res.ResetPasswordResponse;
+import com.example.auth_service.dtos.response.auth_res.VerifyOtpResponse;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
-import java.util.List;
 
 @Service
-public class ResponseService {
+public class AuthResponseService {
     public ResetPasswordResponse buildResetPasswordResponse(String code, String displayMessage) {
         GeneralStatus status = new GeneralStatus(code, true);
         status.setResponseTime(new Date());
@@ -26,18 +30,6 @@ public class ResponseService {
         status.setDisplayMessage(displayMessage);
         status.setResponseTime(new Date());
         return new RegisterResponse(status);
-    }
-    public VerifyOtpResponse buildVerifyOtpResponse(String code, String displayMessage) {
-        GeneralStatus status = new GeneralStatus(code, true);
-        status.setDisplayMessage(displayMessage);
-        status.setResponseTime(new Date());
-        return new VerifyOtpResponse(status);
-    }
-    public UserGetAllResponse buildUserGetAllResponse(String code, String displayMessage , List<UserDTO> userDTOList) {
-        GeneralStatus status = new GeneralStatus(code, true);
-        status.setDisplayMessage(displayMessage);
-        status.setResponseTime(new Date());
-        return new UserGetAllResponse(status ,userDTOList);
     }
 
 }

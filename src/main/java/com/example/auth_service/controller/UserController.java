@@ -1,11 +1,12 @@
 package com.example.auth_service.controller;
 
-import com.example.auth_service.dtos.response.UserGetAllResponse;
+import com.example.auth_service.dtos.request.user_req.UserAddRequest;
+import com.example.auth_service.dtos.response.User_res.UserAddResponse;
+import com.example.auth_service.dtos.response.User_res.UserDeleteResponse;
+import com.example.auth_service.dtos.response.User_res.UserGetAllResponse;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repositories.UserRepository;
-import com.example.auth_service.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import com.example.auth_service.service.user_service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 
 import java.nio.file.Path;
@@ -100,6 +100,16 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<UserDeleteResponse> deleteUser(@PathVariable String id){
+        return ResponseEntity.ok(userService.deleteUserById(id)) ;
+    }
+
+    @PostMapping("/add")
+    public  ResponseEntity<UserAddResponse> addUser(@RequestBody UserAddRequest userAddRequest){
+        return ResponseEntity.ok(userService.addUser(userAddRequest));
     }
 
 

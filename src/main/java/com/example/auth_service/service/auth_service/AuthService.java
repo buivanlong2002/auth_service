@@ -1,19 +1,22 @@
-package com.example.auth_service.service;
+package com.example.auth_service.service.auth_service;
 
 import com.example.auth_service.Exception.GlobalExceptionHandler;
 import com.example.auth_service.components.JwtTokenUtil;
-import com.example.auth_service.dtos.request.LoginRequest;
-import com.example.auth_service.dtos.request.RegisterRequest;
-import com.example.auth_service.dtos.request.ResetPasswordRequest;
-import com.example.auth_service.dtos.response.AuthResponse;
-import com.example.auth_service.dtos.response.GeneralStatus;
-import com.example.auth_service.dtos.response.RegisterResponse;
-import com.example.auth_service.dtos.response.ResetPasswordResponse;
+import com.example.auth_service.dtos.request.auth_req.LoginRequest;
+import com.example.auth_service.dtos.request.auth_req.RegisterRequest;
+import com.example.auth_service.dtos.request.auth_req.ResetPasswordRequest;
+
+
+import com.example.auth_service.dtos.response.auth_res.AuthResponse;
+import com.example.auth_service.dtos.response.auth_res.RegisterResponse;
+import com.example.auth_service.dtos.response.auth_res.ResetPasswordResponse;
 import com.example.auth_service.model.Role;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repositories.OtpTokenRepository;
 import com.example.auth_service.repositories.RoleRepository;
 import com.example.auth_service.repositories.UserRepository;
+import com.example.auth_service.service.otp_service.OtpService;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -25,7 +28,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -47,28 +49,24 @@ public class AuthService {
     @Autowired
     private OtpService otpService;
     @Autowired
-    private ExecutorService executorService;
-   @Autowired
-    private ResponseService responseService;
-   @Autowired
-   private GlobalExceptionHandler globalExceptionHandler;
+    private AuthResponseService authResponseService;
+    @Autowired
+    private GlobalExceptionHandler globalExceptionHandler;
 
-    public AuthService(ExecutorService executorService) {
-        this.executorService = executorService;
-    }
+
 
     public AuthResponse login(LoginRequest request) {
 //        long startTime = System.currentTimeMillis();
         try {
             User user = userRepository.findByEmail(request.getEmail()).orElse(null);
             if (user == null) {
-                return responseService.buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
+                return authResponseService.buildAuthResponse("01", "Email hoặc số điện thoại chưa được đăng ký");
             }
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                return responseService.buildAuthResponse("02", "Mật khẩu không chính xác");
+                return authResponseService.buildAuthResponse("02", "Mật khẩu không chính xác");
             }
             String token = jwtTokenUtil.generateToken(user);
-            return responseService.buildAuthResponse("00", "Đăng nhập thành công", token);
+            return authResponseService.buildAuthResponse("00", "Đăng nhập thành công", token);
         } catch (Exception ex) {
             ex.printStackTrace();
             return globalExceptionHandler.handleRuntimeException((RuntimeException) ex).getBody();
@@ -80,7 +78,10 @@ public class AuthService {
         try {
             // 1. Kiểm tra email đã tồn tại chưa
             if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-                return responseService.buildRegisterResponse("01","Email đã được sử dụng");
+                return authResponseService.buildRegisterResponse("01", "Email đã được sử dụng");
+            }
+            if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+                return authResponseService.buildRegisterResponse("02", "Số diện thoại đã được sử dụng");
             }
 //            // 2. Lấy Role (nếu roleId null thì set mặc định)
             Role role;
@@ -99,14 +100,15 @@ public class AuthService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setRole(role);
             user.setActive(true);
+            user.setAvatarUrl("default.png");
             // 4. Lưu user
             userRepository.save(user);
             // 5. Trả về AuthResponse
-            return responseService.buildRegisterResponse("00","Đăng ký thành công");
+            return authResponseService.buildRegisterResponse("00", "Đăng ký thành công");
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            return responseService.buildRegisterResponse("99","Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
+            return authResponseService.buildRegisterResponse("99", "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.");
         }
     }
 
@@ -114,7 +116,7 @@ public class AuthService {
         // Xác thực OTP
 
         if (!otpService.verifyOtp(request.getEmail(), request.getOtp())) {
-            return responseService.buildResetPasswordResponse("01","Otp đã hết hạn ");
+            return authResponseService.buildResetPasswordResponse("01", "Otp đã hết hạn ");
         }
         otpTokenRepository.deleteByEmail(request.getEmail());
 
@@ -124,7 +126,7 @@ public class AuthService {
         // Cập nhật mật khẩu mới
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-          return responseService.buildResetPasswordResponse("00","Đổi mật khẩu thành công ");
+        return authResponseService.buildResetPasswordResponse("00", "Đổi mật khẩu thành công ");
     }
 
     public User loginGoogle(@NotBlank String token) throws Exception {

@@ -1,7 +1,7 @@
 package com.example.auth_service.Exception;
 
 
-import com.example.auth_service.dtos.response.AuthResponse;
+import com.example.auth_service.dtos.response.auth_res.AuthResponse;
 import com.example.auth_service.dtos.response.GeneralStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

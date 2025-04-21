@@ -1,4 +1,4 @@
-package com.example.auth_service.service;
+package com.example.auth_service.service.email_service;
 
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

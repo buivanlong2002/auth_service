@@ -1,4 +1,4 @@
-package com.example.auth_service.dtos.request;
+package com.example.auth_service.dtos.request.user_req;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class UserAddRequest {
     private String name;
     private String phone ;
     private String email;

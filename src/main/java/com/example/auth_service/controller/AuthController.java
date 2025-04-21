@@ -2,15 +2,15 @@ package com.example.auth_service.controller;
 
 
 
-import com.example.auth_service.dtos.request.LoginGoogleDTO;
-import com.example.auth_service.dtos.request.LoginRequest;
-import com.example.auth_service.dtos.request.RegisterRequest;
-import com.example.auth_service.dtos.request.ResetPasswordRequest;
-import com.example.auth_service.dtos.response.AuthResponse;
-import com.example.auth_service.dtos.response.RegisterResponse;
-import com.example.auth_service.dtos.response.ResetPasswordResponse;
+import com.example.auth_service.dtos.request.auth_req.LoginGoogleDTO;
+import com.example.auth_service.dtos.request.auth_req.LoginRequest;
+import com.example.auth_service.dtos.request.auth_req.RegisterRequest;
+import com.example.auth_service.dtos.request.auth_req.ResetPasswordRequest;
+import com.example.auth_service.dtos.response.auth_res.AuthResponse;
+import com.example.auth_service.dtos.response.auth_res.RegisterResponse;
+import com.example.auth_service.dtos.response.auth_res.ResetPasswordResponse;
 import com.example.auth_service.model.User;
-import com.example.auth_service.service.AuthService;
+import com.example.auth_service.service.auth_service.AuthService;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

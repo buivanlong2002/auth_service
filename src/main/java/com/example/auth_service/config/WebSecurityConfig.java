@@ -45,8 +45,10 @@ public class WebSecurityConfig {
                                         String.format("%s/auth/reset-password", apiPrefix),
                                         String.format("%s/auth/login-google", apiPrefix),
                                         String.format("%s/auth/otp/verify", apiPrefix),
-                                        String.format("%s/users", apiPrefix),
                                         String.format("%s/auth/login", apiPrefix)
+//                                        String.format("%s/users", apiPrefix),
+//                                        String.format("%s/users/add", apiPrefix)
+
                                 ).permitAll()
 
                                 // ✅ Public Endpoint for users with dynamic ID (e.g., /users/{id}/avatar)
