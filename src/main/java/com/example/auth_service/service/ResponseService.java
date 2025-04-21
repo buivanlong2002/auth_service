@@ -3,6 +3,8 @@ package com.example.auth_service.service;
 import com.example.auth_service.dtos.response.*;
 import org.springframework.stereotype.Service;
 import java.util.Date;
+import java.util.List;
+
 @Service
 public class ResponseService {
     public ResetPasswordResponse buildResetPasswordResponse(String code, String displayMessage) {
@@ -31,4 +33,11 @@ public class ResponseService {
         status.setResponseTime(new Date());
         return new VerifyOtpResponse(status);
     }
+    public UserGetAllResponse buildUserGetAllResponse(String code, String displayMessage , List<UserDTO> userDTOList) {
+        GeneralStatus status = new GeneralStatus(code, true);
+        status.setDisplayMessage(displayMessage);
+        status.setResponseTime(new Date());
+        return new UserGetAllResponse(status ,userDTOList);
+    }
+
 }

@@ -38,26 +38,31 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Enable CORS
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class) // ✅ Add JWT filter
                 .authorizeHttpRequests(requests -> requests
-                        // ✅ Public Endpoints
-                        .requestMatchers(
-                                String.format("%s/auth/register", apiPrefix),
-                                String.format("%s/auth/otp/send", apiPrefix),
-                                String.format("%s/auth/reset-password", apiPrefix),
-                                String.format("%s/auth/login-google", apiPrefix),
-                                String.format("%s/auth/otp/verify", apiPrefix),
-                                String.format("%s/auth/login", apiPrefix)
+                                // ✅ Public Endpoints
+                                .requestMatchers(
+                                        String.format("%s/auth/register", apiPrefix),
+                                        String.format("%s/auth/otp/send", apiPrefix),
+                                        String.format("%s/auth/reset-password", apiPrefix),
+                                        String.format("%s/auth/login-google", apiPrefix),
+                                        String.format("%s/auth/otp/verify", apiPrefix),
+                                        String.format("%s/users", apiPrefix),
+                                        String.format("%s/auth/login", apiPrefix)
+                                ).permitAll()
 
+                                // ✅ Public Endpoint for users with dynamic ID (e.g., /users/{id}/avatar)
+                                .requestMatchers(
+                                        req -> req.getServletPath().contains(
+                                                String.format("%s/users/", apiPrefix)
+                                        ) // Kiểm tra chỉ URL
+                                ).permitAll()
 
-                        ).permitAll()
-
-                        // ✅ Orders
+                                // ✅ Orders - Uncomment and modify this part if you have role-based access to orders
 //                        .requestMatchers(PUT, String.format("%s/orders/**", apiPrefix)).hasRole(Role.ADMIN)
 //                        .requestMatchers(GET, String.format("%s/orders/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.USER)
 //                        .requestMatchers(POST, String.format("%s/orders/**", apiPrefix)).hasRole(Role.USER)
 //                        .requestMatchers(DELETE, String.format("%s/orders/**", apiPrefix)).hasRole(Role.ADMIN)
 
-
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()  // ✅ All other requests require authentication
                 );
 
         return http.build();
@@ -76,4 +81,3 @@ public class WebSecurityConfig {
         return source;
     }
 }
-

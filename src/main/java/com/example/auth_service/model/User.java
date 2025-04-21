@@ -42,6 +42,10 @@ public class User extends BaseEntity  implements UserDetails {
 
     private boolean active;
 
+    @Column(name = "img")
+    private String avatarUrl;
+
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

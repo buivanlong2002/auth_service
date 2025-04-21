@@ -11,4 +11,5 @@ public class AppConfig {
     public ExecutorService executorService() {
         return Executors.newFixedThreadPool(5); // hoặc dùng ThreadPoolExecutor tùy nhu cầu
     }
+
 }

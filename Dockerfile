@@ -1,4 +1,3 @@
-# Stage 1: Build
 FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 
