@@ -3,7 +3,7 @@ package com.example.auth_service.config;
 
 
 
-import com.example.auth_service.filters.JwtTokenFilter;
+import com.example.auth_service.infrastructure.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                                         String.format("%s/auth/reset-password", apiPrefix),
                                         String.format("%s/auth/login-google", apiPrefix),
                                         String.format("%s/auth/otp/verify", apiPrefix),
+                                        String.format("%s/auth/decode", apiPrefix),
                                         String.format("%s/auth/login", apiPrefix)
 //                                        String.format("%s/users", apiPrefix),
 //                                        String.format("%s/users/add", apiPrefix)

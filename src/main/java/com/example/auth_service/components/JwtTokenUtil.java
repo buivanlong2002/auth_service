@@ -1,139 +1,127 @@
 package com.example.auth_service.components;
 
-
-import com.example.auth_service.model.User;
+import com.example.auth_service.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.InvalidParameterException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Function;
+
 @Component
-@RequiredArgsConstructor // Tự động tạo constructor cho các field final hoặc @NonNull
+@RequiredArgsConstructor
 public class JwtTokenUtil {
 
-    @Value("${jwt.expiration:3600}") // Lấy giá trị thời gian hết hạn token từ file cấu hình, mặc định 3600 giây
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
+
+    @Value("${jwt.expiration:3600}")
     private int expiration;
 
-    @Value("${jwt.secretKey}") // Lấy secret key từ file cấu hình
+    @Value("${jwt.secretKey}")
     private String secretKey;
 
     /**
-     * Tạo JWT token dựa trên thông tin người dùng.
-     *
-     * @param user Đối tượng người dùng
-     * @return Chuỗi JWT token
-     * @throws Exception Nếu có lỗi khi tạo token
+     * Tạo JWT token từ thông tin người dùng.
      */
     public String generateToken(User user) throws Exception {
-        Map<String, Object> claims = new HashMap<>(); // Khởi tạo claims để lưu thông tin bổ sung
-        claims.put("Email", user.getEmail()); // Thêm thông tin số điện thoại vào claims
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
+        claims.put("name", user.getName());
+        claims.put("email", user.getEmail());
+        claims.put("image", user.getAvatarUrl());
 
         try {
             return Jwts.builder()
-                    .setClaims(claims) // Gán claims vào token
-                    .setSubject(user.getEmail()) // Thiết lập subject (ở đây là số điện thoại)
-                    .setIssuedAt(new Date()) // Thời gian phát hành token
-                    .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000L)) // Thiết lập thời gian hết hạn
-                    .signWith(getPrivateKey(), SignatureAlgorithm.HS256) // Ký token bằng private key với thuật toán HS256
-                    .compact(); // Tạo token
+                    .setClaims(claims)
+                    .setSubject(user.getEmail())
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000L))
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
         } catch (Exception e) {
-            throw new Exception("Error generating token: " + e.getMessage(), e); // Ném ngoại lệ nếu có lỗi
+            logger.error("Error generating token: {}", e.getMessage());
+            throw new Exception("Error generating token: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Lấy private key từ secret key đã được mã hóa base64.
-     *
-     * @return Đối tượng Key để ký hoặc xác thực JWT
+     * Lấy Key từ chuỗi secret key (chuỗi bình thường, không mã hóa).
      */
-    private Key getPrivateKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey); // Giải mã secret key từ base64
-        return Keys.hmacShaKeyFor(keyBytes); // Tạo HMAC key từ mảng byte
+    public Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
-     * Trích xuất claims (payload) từ JWT token.
-     *
-     * @param token Chuỗi JWT token
-     * @return Đối tượng Claims chứa thông tin payload
+     * Trích xuất toàn bộ claims từ token.
      */
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getPrivateKey()) // Sử dụng private key để xác thực token
-                .build()
-                .parseClaimsJws(token) // Phân tích và xác thực token
-                .getBody(); // Lấy phần payload (claims)
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            logger.error("Error extracting claims from token: {}", e.getMessage());
+            throw new IllegalArgumentException("Invalid JWT token");
+        }
     }
 
     /**
-     * Trích xuất một giá trị cụ thể từ claims của token.
-     *
-     * @param token          JWT token
-     * @param claimsResolver Hàm lấy giá trị cụ thể từ claims
-     * @param <T>            Kiểu dữ liệu của giá trị cần trích xuất
-     * @return Giá trị đã trích xuất
+     * Trích xuất một claim cụ thể từ token.
      */
     public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractClaims(token); // Lấy toàn bộ claims
-        return claimsResolver.apply(claims); // Lấy giá trị cụ thể từ claims
+        final Claims claims = extractClaims(token);
+        return claimsResolver.apply(claims);
     }
 
     /**
-     * Kiểm tra xem token có bị hết hạn hay không.
-     *
-     * @param token JWT token
-     * @return true nếu token đã hết hạn, ngược lại false
+     * Kiểm tra token có hết hạn không.
      */
     public boolean isTokenExpired(String token) {
-        Date expiration = extractClaims(token, Claims::getExpiration); // Lấy thời gian hết hạn từ claims
-        return expiration.before(new Date()); // So sánh thời gian hết hạn với thời gian hiện tại
+        Date expiration = extractClaims(token, Claims::getExpiration);
+        return expiration.before(new Date());
     }
 
     /**
-     * Trích xuất username (ở đây là số điện thoại) từ token.
-     *
-     * @param token JWT token
-     * @return Username (số điện thoại)
+     * Lấy email từ token.
      */
     public String extractUsername(String token) {
-        return extractClaims(token, Claims::getSubject); // Lấy subject từ claims
+        try {
+            return extractClaims(token, Claims::getSubject); // Lấy subject từ payload của token
+        } catch (Exception e) {
+            logger.error("Error extracting username from token: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
-     * Xác thực token với thông tin người dùng.
-     *
-     * @param token       JWT token
-     * @param userDetails Thông tin chi tiết người dùng
-     * @return true nếu token hợp lệ, ngược lại false
+     * Kiểm tra token có hợp lệ không dựa trên email và hạn dùng.
      */
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String phoneNumber = extractUsername(token); // Lấy username (số điện thoại) từ token
-        return phoneNumber.equals(userDetails.getUsername()) && !isTokenExpired(token); // Kiểm tra username và thời hạn token
+        final String username = extractUsername(token);
+        return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
-     * Tạo một secret key ngẫu nhiên để sử dụng nếu cần.
-     *
-     * @return Chuỗi secret key đã được mã hóa base64
+     * Tạo secret key ngẫu nhiên (chỉ dùng khi cần tạo mới).
      */
     private String generateSecretKey() {
-        SecureRandom random = new SecureRandom(); // Tạo đối tượng random an toàn
-        byte[] keyBytes = new byte[32]; // Tạo mảng byte 32 phần tử (256 bit)
-        random.nextBytes(keyBytes); // Sinh ngẫu nhiên các byte
-        return Encoders.BASE64.encode(keyBytes); // Mã hóa base64 và trả về
+        SecureRandom random = new SecureRandom();
+        byte[] keyBytes = new byte[32];
+        random.nextBytes(keyBytes);
+        return java.util.Base64.getEncoder().encodeToString(keyBytes);
     }
 }

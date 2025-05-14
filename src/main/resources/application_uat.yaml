@@ -33,6 +33,16 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+logging:
+  file:
+    name: mylog.log
+  level:
+    root: ERROR
+
+
+
+
 api:
   prefix: api
 
@@ -41,4 +51,3 @@ jwt:
   secretKey: ${JWT_SECRET_KEY:}
 google:
   client-id: ${KEY_GOOGLE:}
-

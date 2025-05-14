@@ -1,12 +1,11 @@
 package com.example.auth_service.controller;
 
-import com.example.auth_service.dtos.request.user_req.UserAddRequest;
-import com.example.auth_service.dtos.response.User_res.UserAddResponse;
-import com.example.auth_service.dtos.response.User_res.UserDeleteResponse;
-import com.example.auth_service.dtos.response.User_res.UserGetAllResponse;
-import com.example.auth_service.model.User;
+import com.example.auth_service.dtos.request.UserAddRequest;
+import com.example.auth_service.dtos.response.ApiResponse;
+import com.example.auth_service.dtos.response.UserResponse;
+import com.example.auth_service.entity.User;
 import com.example.auth_service.repositories.UserRepository;
-import com.example.auth_service.service.user_service.UserService;
+import com.example.auth_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RestController
@@ -34,11 +34,29 @@ public class UserController {
 
 
     @GetMapping // GET /api/users
-    public ResponseEntity<UserGetAllResponse> getAllUsers() {
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    // Đổi avatar người dùng
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addUser(@RequestBody UserAddRequest userAddRequest) {
+        return ResponseEntity.ok(userService.addUser(userAddRequest));
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody UserAddRequest userAddRequest) {
+        return ResponseEntity.ok(userService.updateUser(id, userAddRequest));
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+
     @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadUserAvatar(
             @PathVariable("id") String userId,
@@ -48,7 +66,7 @@ public class UserController {
                 return ResponseEntity.badRequest().body("File is empty");
             }
 
-            // Kiểm tra kích thước file
+
             if (file.getSize() > 10 * 1024 * 1024) {
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                         .body("File is too large! Max 10MB");
@@ -75,6 +93,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+    // Lấy ảnh avatar người dùng
     @GetMapping("/avatar-file/{fileName}")
     public ResponseEntity<?> getAvatarByFileName(@PathVariable String fileName) {
         try {
@@ -102,15 +122,9 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<UserDeleteResponse> deleteUser(@PathVariable String id){
-        return ResponseEntity.ok(userService.deleteUserById(id)) ;
+    // Xóa người dùng
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        return ResponseEntity.ok(userService.deleteUserById(id));
     }
-
-    @PostMapping("/add")
-    public  ResponseEntity<UserAddResponse> addUser(@RequestBody UserAddRequest userAddRequest){
-        return ResponseEntity.ok(userService.addUser(userAddRequest));
-    }
-
-
 }

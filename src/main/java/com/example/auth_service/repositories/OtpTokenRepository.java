@@ -1,7 +1,7 @@
 package com.example.auth_service.repositories;
 
 
-import com.example.auth_service.model.OtpToken;
+import com.example.auth_service.entity.OtpToken;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,26 +1,40 @@
 package com.example.auth_service.Exception;
 
 
-import com.example.auth_service.dtos.response.auth_res.AuthResponse;
+import com.example.auth_service.dtos.response.ApiResponse;
 import com.example.auth_service.dtos.response.GeneralStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Date;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Exception handler cho RuntimeException
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<AuthResponse> handleRuntimeException(RuntimeException ex) {
-        // Tạo một đối tượng GeneralStatus với code "99" cho lỗi không xác định
-        GeneralStatus status = new GeneralStatus("99", false);
-        status.setMessage(ex.getMessage()); // Đặt message từ exception
-        status.setDisplayMessage("Đã xảy ra lỗi. Vui lòng thử lại."); // Đặt message hiển thị cho người dùng
-        status.setResponseTime(new java.util.Date()); // Đặt thời gian phản hồi cho lỗi
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("99", ex.getMessage()));
+    }
 
-        // Trả về response với status và token là null (hoặc có thể thay đổi theo nhu cầu)
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(status, null));
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("01", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationError(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .findFirst()
+                .orElse("Invalid request");
+
+        return ResponseEntity.badRequest().body(ApiResponse.error("VALIDATION_ERROR", errorMessage));
     }
 }
+
