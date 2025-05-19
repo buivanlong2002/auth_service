@@ -6,11 +6,13 @@ import com.example.auth_service.dtos.response.UserResponse;
 import com.example.auth_service.entity.User;
 import com.example.auth_service.repositories.UserRepository;
 import com.example.auth_service.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
@@ -21,41 +23,38 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @RestController
-@RequestMapping("/api/users") // Đường dẫn chính
+@RequestMapping("/api/users")
+@Validated
 public class UserController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private UserRepository userRepository;
+
     private final Path imageLocation = Paths.get("uploads/");
 
-
-    @GetMapping // GET /api/users
+    @GetMapping
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-
     @PostMapping("/add")
-    public ResponseEntity<?> addUser(@RequestBody UserAddRequest userAddRequest) {
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserAddRequest userAddRequest) {
         return ResponseEntity.ok(userService.addUser(userAddRequest));
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody UserAddRequest userAddRequest) {
+    public ResponseEntity<?> updateUser(@PathVariable String id, @Valid @RequestBody UserAddRequest userAddRequest) {
         return ResponseEntity.ok(userService.updateUser(id, userAddRequest));
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
-
 
     @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadUserAvatar(
@@ -65,7 +64,6 @@ public class UserController {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("File is empty");
             }
-
 
             if (file.getSize() > 10 * 1024 * 1024) {
                 return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)

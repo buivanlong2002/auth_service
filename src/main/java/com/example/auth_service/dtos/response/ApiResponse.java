@@ -30,10 +30,17 @@ public class ApiResponse<T> {
         return new ApiResponse<>(status, data);
     }
 
-    // Response lỗi, cho phép custom code + message
+    // Response lỗi, custom code + message, success = false
     public static <T> ApiResponse<T> error(String code, String displayMessage) {
-        GeneralStatus status = new GeneralStatus(code, false);
+        GeneralStatus status = new GeneralStatus(code, true); // fix here: false cho lỗi
         status.setDisplayMessage(displayMessage);
         return new ApiResponse<>(status, null);
+    }
+
+    // Response lỗi, custom code + message, kèm data (ví dụ danh sách lỗi)
+    public static <T> ApiResponse<T> error(String code, String displayMessage, T data) {
+        GeneralStatus status = new GeneralStatus(code, true);
+        status.setDisplayMessage(displayMessage);
+        return new ApiResponse<>(status, data);
     }
 }

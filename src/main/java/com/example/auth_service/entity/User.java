@@ -1,8 +1,6 @@
 package com.example.auth_service.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,11 +24,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @Email(message = "Email should be valid")  // Email validation
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be 10 digits and start with 0") // Phone number validation (example for Vietnam)
     @Column(unique = true, nullable = false)
     private String phone;
 
@@ -40,8 +36,10 @@ public class User extends BaseEntity implements UserDetails {
     @Transient
     private String confirmPassword;
 
+    @Column(name = "facebook_account_id", nullable = false)
     private int facebookAccountId;
 
+    @Column(name = "google_account_id", nullable = false)
     private int googleAccountId;
 
     private boolean active;
@@ -55,31 +53,31 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> role.getName()); // Assuming Role has a 'name' field for role name
+        return List.of(() -> role.getName());
     }
 
     @Override
     public String getUsername() {
-        return email;  // Use email as the username
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;  // You can add your logic here if needed
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;  // You can add your logic here if needed
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;  // You can add your logic here if needed
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return active;  // Check if account is active
+        return active;
     }
 }
